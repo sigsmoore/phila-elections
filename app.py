@@ -297,7 +297,7 @@ def display_choropleth(year, office, div, vals):
         mapbox_accesstoken=mapbox_token,
         mapbox_zoom=10, mapbox_center={"lat": 40.0, "lon": -75.1636},
         uirevision=1,
-        margin=dict(l=40, r=80, b=40, t=40),
+        margin=dict(l=40, r=80, b=0, t=40),
     )
     return fig
 
