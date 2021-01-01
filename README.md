@@ -40,3 +40,6 @@ N.B. some CSV files contain latin-1 characters
 * [Mapbox](https://www.mapbox.com/)
 * [pandas](https://pandas.pydata.org/)
 * [Heroku](https://www.heroku.com/)
+* [OpenDataPhilly](https://www.opendataphilly.org)
+* [philadelphiavotes.com](https://philadelphiavotes.com)
+* Inspired by: <https://gothamist.com/news/official-results-map-see-how-your-nyc-neighbors-voted-2020-election>
