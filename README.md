@@ -11,7 +11,6 @@
 
 * <https://www.opendataphilly.org/dataset/political-wards>
 * <https://www.opendataphilly.org/dataset/political-ward-divisions>
-* <https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json>
 
 ## Data format
 
@@ -23,6 +22,8 @@ CSV files have the following columns:
 1. **OFFICE** or **CATEGORY** capital letter string
 1. **CANDIDATE**, **NAME**, or **SELECTION** capital letter string
 1. **VOTES** or **VOTE COUNT** integer
+
+N.B. some CSV files contain latin-1 characters
 
 ### Type codes
 
