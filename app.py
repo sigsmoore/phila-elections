@@ -123,7 +123,10 @@ github_ref = 'https://github.com/sigsmoore/phila-elections'
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__,
+                title='Philadelphia General Elections',
+                external_stylesheets=external_stylesheets
+)
 server = app.server
 
 app.layout = html.Div([
@@ -194,6 +197,109 @@ app.layout = html.Div([
         style={'font-size': 'small', 'width': '100%'},
     ),
 ])
+
+
+##### CALLBACKS #####
+from dash.dependencies import Input, Output, State
+
+@app.callback(
+    Output('office', 'options'),
+    Output('office', 'value'),
+    Input('year', 'value'),
+    State('office', 'value'))
+def set_office_options(year, old_val):
+    new_val = old_val if old_val in offices[year] else offices[year][0]
+    return [dict(label=r, value=r) for r in offices[year]], new_val
+
+@app.callback(
+    Output('tile-values', 'options'),
+    Output('tile-values', 'value'),
+    Input('office', 'value'),
+    State('year', 'value'),
+    State('division', 'value'),
+    State('tile-values', 'value'))
+def set_value_options(office, year, div, old_val):
+    key = f"{year} general by {div} for {office}"
+    df = pivoted_dataframes[key]
+    opts = []
+    for party in party_comparison_colorscale.keys():
+        txt = party + ' percentage'
+        opts.append(dict(
+            label=txt.capitalize(),
+            value=txt.upper(),
+            disabled=(party not in df.columns)
+        ))
+    for party in party_colorscale.keys():
+        txt = party + ' votes'
+        opts.append(dict(
+            label=txt.capitalize(),
+            value=txt.upper(),
+            disabled=(party not in df.columns)
+        ))
+    new_val = (old_val if not next(o for o in opts if o['value']==old_val)['disabled']
+                       else next(o for o in opts if not o['disabled'])['value'])
+    return opts, new_val
+
+import plotly.graph_objects as go
+@app.callback(
+    Output('choropleth', 'figure'),
+    Input('year', 'value'),
+    Input('office', 'value'),
+    Input('division', 'value'),
+    Input('tile-values', 'value'))
+def display_choropleth(year, office, div, vals):
+    key = f"{year} general by {div} for {office}"
+    df = pivoted_dataframes[key]
+    args = dict(
+        geojson=geo,
+        locations=df.index,
+        marker_line_color='rgba(128, 128, 128, 0.1)',
+        marker_opacity=0.6,
+        customdata=[
+            '<br>'.join(party.title() + " votes: " + str(row[party]) for party in df.columns)
+            for _,row in df.iterrows()
+        ],
+    )
+    party,vtype = vals.split()
+    if vtype=='PERCENTAGE':
+        args.update(
+            z=100*df[party]/df['TOTAL'],
+            zmin=0,
+            zmax=100,
+            colorscale=party_comparison_colorscale[party],
+            colorbar=dict(
+                title=vals.title(),
+                tickmode="array",
+                tickvals=[0, 50, 100],
+                ticktext=["0%", "50%", "100%"],
+                ticks="outside"
+            ),
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                + vals.capitalize() + ": %{z:.1f}%<br><br>"
+                + "%{customdata}<extra></extra>"
+            ),
+        )
+    else:
+        args.update(
+            z=df[party],
+            zmin=0,
+            colorscale=party_colorscale[party],
+            colorbar=dict(title=vals.title()),
+            hovertemplate="<b>%{text}</b><br><br>%{customdata}<extra></extra>",
+        )
+    args['text'] = (['Ward '+loc for loc in df.index] if div=='ward'
+                    else [f"Ward {loc[:2]}, Division {loc[2:]}" for loc in df.index])
+    fig = go.Figure(go.Choroplethmapbox(**args))
+    fig.update_layout(
+        # title_text=("Philadelphia " + year + " General Election by "
+        #             + ("Ward" if div=='ward' else "Voting District")),
+        mapbox_accesstoken=mapbox_token,
+        mapbox_zoom=10, mapbox_center={"lat": 40.0, "lon": -75.1636},
+        uirevision=1,
+        margin=dict(l=40, r=80, b=40, t=40),
+    )
+    return fig
 
 
 ##### START SERVER #####
