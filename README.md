@@ -33,3 +33,10 @@ N.B. some CSV files contain latin-1 characters
 - **L** = mail-in
 - **M** = election day/in-person
 - **P** = provisional
+
+## Dependencies / Thanks to
+
+* [Plotly / Dash](https://plotly.com/)
+* [Mapbox](https://www.mapbox.com/)
+* [pandas](https://pandas.pydata.org/)
+* [Heroku](https://www.heroku.com/)
