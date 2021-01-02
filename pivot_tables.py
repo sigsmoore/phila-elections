@@ -73,7 +73,7 @@ import tables
 # we're going to have "unnatural" key values
 warnings.simplefilter('ignore', tables.NaturalNameWarning)
 
-data = pd.HDFStore('data/pivoted_tables.h5')
+data = pd.HDFStore('data/pivoted_tables.h5', 'w')
 
 ##### PIVOT DATA #####
 for key,df in dataframes.items():
